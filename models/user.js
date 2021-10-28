@@ -1,6 +1,5 @@
 const mongoose = require('mongoose');
 const Joi = require('joi');
-const { productSchema } = require('./product');
 const config = require('config');
 const jwt = require('jsonwebtoken');
 
@@ -8,8 +7,8 @@ const userSchema = new mongoose.Schema({
     name: {type: String, required: true, minlength: 5, maxlength: 50 },
     email: {type : String, unique: true, required: true, minlength: 5, maxlength: 255 },
     password: { type: String, required: true, maxlength: 1024, minlength: 5 },
-    friendList: {type: String, default: [] },
-    pendingFrendList: {type: String, default: [] },
+    friendList: {type: String, default: [null] },
+    pendingFrendList: {type: String, default: [null] },
     // picture: {type: as a string and bring in a 3rd party api },
     isAdmin: { type: Boolean, default: false },
 });
