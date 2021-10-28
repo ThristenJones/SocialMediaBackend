@@ -10,7 +10,7 @@ const userSchema = new mongoose.Schema({
     password: { type: String, required: true, maxlength: 1024, minlength: 5 },
     friendList: {type: String, default: [] },
     pendingFrendList: {type: String, default: [] },
-    // picture: {type: },
+    // picture: {type: as a string and bring in a 3rd party api },
     isAdmin: { type: Boolean, default: false },
 });
 
