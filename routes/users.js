@@ -1,4 +1,4 @@
-const { User, validateUser } = require('../models/user');
+const { User, Friend, validateUser, validateFriend } = require('../models/user');
 const bcrypt = require('bcrypt');
 const auth = require('../middleware/auth');
 const express = require('express');
@@ -33,21 +33,41 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.post('/friend/:email', async (req, res) => {
+router.post('/friend/:name', async (req, res) => {
     try {
         const { error } = validateFriend(req.body);
         if (error) return res.status(400).send(error);
         
-        const friend = await Friend.findOne({email: req.body.email});
-        if (!friend) return res.status(400).send(`The comment with email "${req.params.email}" does not exist.`);
+        const user = await User.findOne({user: req.body.name});
+        if (!user) return res.status(400).send(`The friend with email "${req.params.name}" does not exist.`);
         
-        const email = new Email({
-            email: req.body.email
+        const friend = new Friend({
+            name: req.body.name
         })
-        email.replies.push(email);
+        user.friendList.push(friend);
         
-        await email.save();
-        return res.send(email);
+        await user.save();
+        return res.send(user);
+    } catch (ex) {
+        return res.status(500).send(`Internal Server Error: ${ex}`);
+    }
+});
+
+router.post('/pendingFriend/:name', async (req, res) => {
+    try {
+        const { error } = validateFriend(req.body);
+        if (error) return res.status(400).send(error);
+        
+        const user = await User.findOne({user: req.body.name});
+        if (!user) return res.status(400).send(`The friend with email "${req.params.name}" does not exist.`);
+        
+        const friend = new Friend({
+            name: req.body.name
+        })
+        user.friendList.push(friend);
+        
+        await user.save();
+        return res.send(user);
     } catch (ex) {
         return res.status(500).send(`Internal Server Error: ${ex}`);
     }
