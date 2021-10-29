@@ -33,7 +33,28 @@ router.post('/', async (req, res) => {
     }
 });
 
+router.post('/friend/:email', async (req, res) => {
+    try {
+        const { error } = validateFriend(req.body);
+        if (error) return res.status(400).send(error);
+        
+        const friend = await Friend.findOne({email: req.body.email});
+        if (!friend) return res.status(400).send(`The comment with email "${req.params.email}" does not exist.`);
+        
+        const email = new Email({
+            email: req.body.email
+        })
+        email.replies.push(email);
+        
+        await email.save();
+        return res.send(email);
+    } catch (ex) {
+        return res.status(500).send(`Internal Server Error: ${ex}`);
+    }
+});
 
+
+// router.get('/friends/:email')
 
 
 
