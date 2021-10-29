@@ -38,7 +38,7 @@ router.post('/friend/:name', async (req, res) => {
         const { error } = validateFriend(req.body);
         if (error) return res.status(400).send(error);
         
-        const user = await User.findOne({user: req.body.name});
+        const user = await User.find({user: req.body.name});
         if (!user) return res.status(400).send(`The friend with email "${req.params.name}" does not exist.`);
         
         const friend = new Friend({
@@ -58,7 +58,7 @@ router.post('/pendingFriend/:name', async (req, res) => {
         const { error } = validateFriend(req.body);
         if (error) return res.status(400).send(error);
         
-        const user = await User.findOne({user: req.params.name});
+        const user = await User.find({user: req.params.name});
         if (!user) return res.status(400).send(`The friend with email "${req.params.name}" does not exist.`);
         
         const pendingFriend = new PendingFriend({
