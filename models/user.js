@@ -8,12 +8,17 @@ const friendSchema = new mongoose.Schema({
     timeStamp: {type: Date, default: Date.now()},
 });
 
+const pendingFriendSchema = new mongoose.Schema({
+    name: {type: String, required: true, minlength: 5, maxlength: 1000},
+    timeStamp: {type: Date, default: Date.now()},
+});
+
 const userSchema = new mongoose.Schema({
     name: {type: String, unique: true, required: true, minlength: 5, maxlength: 50 },
     email: {type : String, unique: true, required: true, minlength: 5, maxlength: 255 },
     password: { type: String, required: true, maxlength: 1024, minlength: 5 },
     friendList: [{type: friendSchema}],
-    pendingFriendList: {type: Array, default: [] },
+    pendingFriendList: [{type: pendingFriendSchema}],
     // picture: {type: as a string and bring in a 3rd party api },
     isAdmin: { type: Boolean, default: false },
 });
@@ -24,6 +29,7 @@ userSchema.methods.generateAuthToken = function () {
 
 const User = mongoose.model('User',  userSchema);
 const Friend = mongoose.model('Friend',  friendSchema);
+const PendingFriend = mongoose.model('PendingFriend',  pendingFriendSchema);
 
 function validateUser(user) {
     const schema =Joi.object({
@@ -43,5 +49,6 @@ function validateFriend(reply) {
 
 exports.User = User;
 exports.Friend = Friend;
+exports.PendingFriend = PendingFriend;
 exports.validateUser = validateUser;
 exports.validateFriend = validateFriend;

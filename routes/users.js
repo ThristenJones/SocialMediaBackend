@@ -1,4 +1,4 @@
-const { User, Friend, validateUser, validateFriend } = require('../models/user');
+const { User, Friend, PendingFriend, validateUser, validateFriend } = require('../models/user');
 const bcrypt = require('bcrypt');
 const auth = require('../middleware/auth');
 const express = require('express');
@@ -58,13 +58,13 @@ router.post('/pendingFriend/:name', async (req, res) => {
         const { error } = validateFriend(req.body);
         if (error) return res.status(400).send(error);
         
-        const user = await User.findOne({user: req.body.name});
+        const user = await User.findOne({user: req.params.name});
         if (!user) return res.status(400).send(`The friend with email "${req.params.name}" does not exist.`);
         
-        const friend = new Friend({
+        const pendingFriend = new PendingFriend({
             name: req.body.name
         })
-        user.friendList.push(friend);
+        user.pendingFriendList.push(pendingFriend);
         
         await user.save();
         return res.send(user);
