@@ -1,44 +1,110 @@
-const { User, Friend, PendingFriend, validateUser, validateFriend } = require('../models/user');
+const { User, Friend, PendingFriend, validateUser, validateFriend, Post, validatePost } = require('../models/user');
 const bcrypt = require('bcrypt');
 const auth = require('../middleware/auth');
 const express = require('express');
 const router = express.Router();
+
+router.get('/', async (req, res) => {
+    try {
+        const post = await Post.find();
+        return res.send(post);
+    } catch (ex) { 
+        return res.status(500).send(`Internal Server Error: ${ex}`);
+    }
+});
+
+router.post('/', async (req, res) => {
+    try {
+
+        const {error} = validatePost(req.body)
+        if (error)
+        return res.status(400).send(error)
+
+        const post = new Post ({
+            text: req.body.text
+        });
+
+        await post.save();
+        return res.send(post)
+       } catch (ex) {
+            return res.status(500).send(`Internal Server Error: ${ex}`);
+       }
+})
+
+router.put('/:id', async (req, res) => {
+    try {
+        const { error } = Post(req.body);
+        if (error) return res.status(400).send(error);
+
+        const post = await Post.findByIdAndUpdate(
+            req.params.id,
+            {
+                text: req.body.text,
+            }
+        );
+
+        if (!post)
+            return res.send(400).send(`The comment with the id: "${req.params.id}" does not exist`);
+
+            await post.save();
+
+            return res.send(post)
+    } catch (ex) {
+        return res.status(500).send(`Internal Server Error: ${ex}`);
+    }
+});
+
+router.delete('/:id', async (req, res) => {
+    try {
+
+        const post = await Post.findByIdAndRemove(req.params.id);
+
+        if (!post)
+            return res.status(400).send(`The comment with the id: "${req.params.id}" does not exist`);
+
+            return res.send(post);
+    } catch(ex) {
+        return res.status(500).send(`Internal Server Error: ${ex}`);
+    }
+});
+// POSTS
+
 
 router.post('/', async (req, res) => {
     try {
         const { error } = validateUser(req.body);
         if (error) return res.status(400).send(error.details[0].message);
 
-        let user = await User.findOne({ email: req.body.email });
-        if (user) return res.status(400).send('User already registered.');
+        let newUser = await User.findOne({ email: req.body.email });
+        if (newUser) return res.status(400).send('User already registered.');
         
-        const salt = await bcrypt.genSalt(10);
-        user = new User({
+        
+        newUser = new User({
             name: req.body.name,
             email: req.body.email,
-            password: await bcrypt.hash(req.body.password, salt),
+            password: req.body.password
         });
         
-        await user.save();
+        await newUser.save();
         
-        const token = user.generateAuthToken();
+        const token = newUser.generateAuthToken();
 
         return res
         .header('x-auth-token', token)
         .header('access-control-expose-headers', 'x-auth-token')
-        .send({ _id: user._id, name: user.name, email: user.email});
+        .send({ _id: newUser._id, name: newUser.name, email: newUser.email});
 
         } catch (ex) {
         return res.status(500).send(`Internal Server Error: ${ex}`);
     }
 });
 
-router.post('/friend/:name', async (req, res) => {
+router.post('/friend', async (req, res) => {
     try {
         const { error } = validateFriend(req.body);
         if (error) return res.status(400).send(error);
         
-        const user = await User.find({name: req.body.name});
+        const user = await User.find({user: req.params.name});
         if (!user) return res.status(400).send(`The friend with email "${req.params.name}" does not exist.`);
         
         const friend = new Friend({

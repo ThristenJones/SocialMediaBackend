@@ -23,6 +23,11 @@ const userSchema = new mongoose.Schema({
     isAdmin: { type: Boolean, default: false },
 });
 
+const postSchema = new mongoose.Schema({
+    text: {type: String, required: true, minlength: 1, maxlength: 1000},
+    timeStamp: {type: Date, default: Date.now()},
+});
+
 userSchema.methods.generateAuthToken = function () {
     return jwt.sign({ _id: this._id, name: this.name, isAdmin: this.isAdmin }, config.get('jwtSecret'));
 };
@@ -30,6 +35,7 @@ userSchema.methods.generateAuthToken = function () {
 const User = mongoose.model('User',  userSchema);
 const Friend = mongoose.model('Friend',  friendSchema);
 const PendingFriend = mongoose.model('PendingFriend',  pendingFriendSchema);
+const Post = mongoose.model('Post', postSchema)
 
 function validateUser(user) {
     const schema =Joi.object({
@@ -42,13 +48,24 @@ function validateUser(user) {
 
 function validateFriend(reply) {
     const schema = Joi.object({
-        name: Joi.string().min(2).max(1000).required()
+        name: Joi.string().min(1).max(1000).required()
     });
     return schema.validate(reply);
 }
 
+function validatePost(post) {
+    const schema = Joi.object({
+        text: Joi.string().min(1).max(1000).required(),
+    });
+    return schema.validate(post);
+}
+
+
 exports.User = User;
 exports.Friend = Friend;
 exports.PendingFriend = PendingFriend;
+exports.Post = Post;
 exports.validateUser = validateUser;
 exports.validateFriend = validateFriend;
+exports.validatePost = validatePost;
+
