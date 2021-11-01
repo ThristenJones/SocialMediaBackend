@@ -38,11 +38,11 @@ router.post('/friend/:name', async (req, res) => {
         const { error } = validateFriend(req.body);
         if (error) return res.status(400).send(error);
         
-        const user = await User.find({user: req.body.name});
+        const user = await User.find({name: req.body.name});
         if (!user) return res.status(400).send(`The friend with email "${req.params.name}" does not exist.`);
         
         const friend = new Friend({
-            name: req.body.name
+            user: req.body.name
         })
         user.friendList.push(friend);
         
@@ -62,7 +62,7 @@ router.post('/pendingFriend/:name', async (req, res) => {
         if (!user) return res.status(400).send(`The friend with email "${req.params.name}" does not exist.`);
         
         const pendingFriend = new PendingFriend({
-            name: req.body.name
+            user: req.body.name
         })
         user.pendingFriendList.push(pendingFriend);
         
@@ -74,9 +74,14 @@ router.post('/pendingFriend/:name', async (req, res) => {
 });
 
 
-// router.get('/friends/:email')
-
-
+router.get('/', async (req,res) => {
+    try{
+        const user = await User.find();
+        return res.send(user);
+    } catch (ex) {
+        return res.status(500).send(`Internal Server Error: ${ex}`);
+    }
+});
 
 
 
