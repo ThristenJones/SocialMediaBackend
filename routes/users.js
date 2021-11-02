@@ -4,16 +4,16 @@ const auth = require('../middleware/auth');
 const express = require('express');
 const router = express.Router();
 
-router.get('/', async (req, res) => {
+router.get('/post/:name', async (req, res) => {
     try {
-        const post = await Post.find();
+        const post = await Post.find({name: req.params.name});
         return res.send(post);
     } catch (ex) { 
         return res.status(500).send(`Internal Server Error: ${ex}`);
     }
 });
 
-router.post('/', async (req, res) => {
+router.post('/post/', async (req, res) => {
     try {
 
         const {error} = validatePost(req.body)
@@ -21,6 +21,7 @@ router.post('/', async (req, res) => {
         return res.status(400).send(error)
 
         const post = new Post ({
+            name: req.body.name,
             text: req.body.text
         });
 
@@ -31,7 +32,7 @@ router.post('/', async (req, res) => {
        }
 })
 
-router.put('/:id', async (req, res) => {
+router.put('/post/:id', async (req, res) => {
     try {
         const { error } = Post(req.body);
         if (error) return res.status(400).send(error);
@@ -44,7 +45,7 @@ router.put('/:id', async (req, res) => {
         );
 
         if (!post)
-            return res.send(400).send(`The comment with the id: "${req.params.id}" does not exist`);
+            return res.send(400).send(`The user with the id: "${req.params.id}" does not exist`);
 
             await post.save();
 
@@ -54,21 +55,19 @@ router.put('/:id', async (req, res) => {
     }
 });
 
-router.delete('/:id', async (req, res) => {
+router.delete('/post/:id', async (req, res) => {
     try {
 
         const post = await Post.findByIdAndRemove(req.params.id);
 
         if (!post)
-            return res.status(400).send(`The comment with the id: "${req.params.id}" does not exist`);
+            return res.status(400).send(`The post with the id: "${req.params.id}" does not exist`);
 
             return res.send(post);
     } catch(ex) {
         return res.status(500).send(`Internal Server Error: ${ex}`);
     }
 });
-// POSTS
-
 
 router.post('/', async (req, res) => {
     try {
@@ -99,16 +98,16 @@ router.post('/', async (req, res) => {
     }
 });
 
-router.post('/friend', async (req, res) => {
+router.post('/friend/:id', async (req, res) => {
     try {
         const { error } = validateFriend(req.body);
         if (error) return res.status(400).send(error);
         
-        const user = await User.find({user: req.params.name});
-        if (!user) return res.status(400).send(`The friend with email "${req.params.name}" does not exist.`);
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(400).send(`The user with id "${req.params.id}" does not exist.`);
         
         const friend = new Friend({
-            user: req.body.name
+            name: req.body.name
         })
         user.friendList.push(friend);
         
@@ -119,16 +118,16 @@ router.post('/friend', async (req, res) => {
     }
 });
 
-router.post('/pendingFriend/:name', async (req, res) => {
+router.post('/pending/:id', async (req, res) => {
     try {
         const { error } = validateFriend(req.body);
         if (error) return res.status(400).send(error);
         
-        const user = await User.find({user: req.params.name});
-        if (!user) return res.status(400).send(`The friend with email "${req.params.name}" does not exist.`);
+        const user = await User.findById(req.params.id);
+        if (!user) return res.status(400).send(`The user with id "${req.params.id}" does not exist.`);
         
         const pendingFriend = new PendingFriend({
-            user: req.body.name
+            name: req.body.name
         })
         user.pendingFriendList.push(pendingFriend);
         
@@ -139,7 +138,6 @@ router.post('/pendingFriend/:name', async (req, res) => {
     }
 });
 
-
 router.get('/', async (req,res) => {
     try{
         const user = await User.find();
@@ -149,6 +147,22 @@ router.get('/', async (req,res) => {
     }
 });
 
+router.delete('/:userId/pendingFriendList/:pendingFriendId', async (req, res) => {
+    try{
+        const user = await User.findById(req.params.userId);
+        if(!user) return res.status(400).send(`The user with id "${req.params.userId}" does not exist.`);
+
+        let pendingFriend = user.pendingFriendList.id(req.params.pendingFriendId);
+        if(!pendingFriend) return res.status(400).send(`The user with id "${req.params.pendingFriendId}" isn't in your pending friends list.`);
+
+        pendingFriend = await pendingFriend.remove();
+
+        await user.save();
+        return res.send(pendingFriend);
+    }catch (ex) {
+        return res.status(500).send(`Internal Server Error: ${ex}`);
+    }
+});
 
 
 module.exports = router;
