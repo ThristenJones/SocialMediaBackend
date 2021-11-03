@@ -4,12 +4,12 @@ const config = require('config');
 const jwt = require('jsonwebtoken');
 
 const friendSchema = new mongoose.Schema({
-    name: {type: String, required: true, minlength: 5, maxlength: 1000},
+    name: {type: String, unique: true, required: true, minlength: 5, maxlength: 1000},
     timeStamp: {type: Date, default: Date.now()},
 });
 
 const pendingFriendSchema = new mongoose.Schema({
-    name: {type: String, required: true, minlength: 5, maxlength: 1000},
+    name: {type: String, unique: true, required: true, minlength: 5, maxlength: 1000},
     timeStamp: {type: Date, default: Date.now()},
 });
 
@@ -26,6 +26,7 @@ const userSchema = new mongoose.Schema({
 const postSchema = new mongoose.Schema({
     name: {type: String, required: true, minlength: 5, maxlength: 50 },
     text: {type: String, required: true, minlength: 1, maxlength: 1000},
+    likes: {type: Number, default: 0},
     timeStamp: {type: Date, default: Date.now()},
 });
 
