@@ -13,22 +13,25 @@ const pendingFriendSchema = new mongoose.Schema({
     timeStamp: {type: Date, default: Date.now()},
 });
 
-const userSchema = new mongoose.Schema({
-    name: {type: String, unique: true, required: true, minlength: 5, maxlength: 50 },
-    email: {type : String, unique: true, required: true, minlength: 5, maxlength: 255 },
-    password: { type: String, required: true, maxlength: 1024, minlength: 5 },
-    friendList: [{type: friendSchema}],
-    pendingFriendList: [{type: pendingFriendSchema}],
-    // picture: {type: as a string and bring in a 3rd party api },
-    isAdmin: { type: Boolean, default: false },
-});
-
 const postSchema = new mongoose.Schema({
     name: {type: String, required: true, minlength: 5, maxlength: 50 },
     text: {type: String, required: true, minlength: 1, maxlength: 1000},
     likes: {type: Number, default: 0},
     timeStamp: {type: Date, default: Date.now()},
 });
+
+const userSchema = new mongoose.Schema({
+    name: {type: String, unique: true, required: true, minlength: 5, maxlength: 50 },
+    email: {type : String, unique: true, required: true, minlength: 5, maxlength: 255 },
+    password: { type: String, required: true, maxlength: 1024, minlength: 5 },
+    friendList: [{type: friendSchema}],
+    pendingFriendList: [{type: pendingFriendSchema}],
+    posts: [{type: postSchema}],
+    // picture: {type: as a string and bring in a 3rd party api },
+    isAdmin: { type: Boolean, default: false },
+});
+
+
 
 userSchema.methods.generateAuthToken = function () {
     return jwt.sign({ _id: this._id, name: this.name, isAdmin: this.isAdmin }, config.get('jwtSecret'));
