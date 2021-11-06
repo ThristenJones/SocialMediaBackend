@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const auth = require('../middleware/auth');
 const express = require('express');
 const router = express.Router();
+const app = express();
+
 
 router.post('/', async (req, res) => {
     try {
