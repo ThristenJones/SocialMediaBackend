@@ -3,6 +3,8 @@ const bcrypt = require('bcrypt');
 const auth = require('../middleware/auth');
 const express = require('express');
 const router = express.Router();
+const app = express();
+
 
 router.post('/', async (req, res) => {
     try {
@@ -97,5 +99,8 @@ router.delete('/:userId/pendingFriendList/:pendingFriendId', async (req, res) =>
         return res.status(500).send(`Internal Server Error: ${ex}`);
     }
 });
+
+
+
 
 module.exports = router;
