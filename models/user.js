@@ -22,7 +22,7 @@ const postSchema = new mongoose.Schema({
 
 const bioSchema = new mongoose.Schema({
     name: {type: String, required: true, minlength: 5, maxlength: 50 },
-    bio: {type: String, required: true, minlength: 1, maxlength: 1000},
+    text: {type: String, required: true, minlength: 1, maxlength: 1000},
     timeStamp: {type: Date, default: Date.now()},
 })
 
@@ -76,7 +76,8 @@ function validatePost(post) {
 
 function validateBio(bio) {
     const schema = Joi.object({
-        bio: Joi.string().min(1).max(1000).required(),
+        name: Joi.string().min(5).max(50).required(),
+        text: Joi.string().min(1).max(1000).required(),
     });
     return schema.validate(bio);
 }
