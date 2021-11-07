@@ -20,6 +20,12 @@ const postSchema = new mongoose.Schema({
     timeStamp: {type: Date, default: Date.now()},
 });
 
+const bioSchema = new mongoose.Schema({
+    name: {type: String, required: true, minlength: 5, maxlength: 50 },
+    bio: {type: String, required: true, minlength: 1, maxlength: 1000},
+    timeStamp: {type: Date, default: Date.now()},
+})
+
 const userSchema = new mongoose.Schema({
     name: {type: String, unique: true, required: true, minlength: 5, maxlength: 50 },
     email: {type : String, unique: true, required: true, minlength: 5, maxlength: 255 },
@@ -27,6 +33,7 @@ const userSchema = new mongoose.Schema({
     friendList: [{type: friendSchema}],
     pendingFriendList: [{type: pendingFriendSchema}],
     posts: [{type: postSchema}],
+    bio: [{type: bioSchema}],
     // picture: {type: as a string and bring in a 3rd party api },
     isAdmin: { type: Boolean, default: false },
 });
@@ -40,7 +47,8 @@ userSchema.methods.generateAuthToken = function () {
 const User = mongoose.model('User',  userSchema);
 const Friend = mongoose.model('Friend',  friendSchema);
 const PendingFriend = mongoose.model('PendingFriend',  pendingFriendSchema);
-const Post = mongoose.model('Post', postSchema)
+const Post = mongoose.model('Post', postSchema);
+const Bio = mongoose.model('Bio', bioSchema);
 
 function validateUser(user) {
     const schema =Joi.object({
@@ -66,12 +74,21 @@ function validatePost(post) {
     return schema.validate(post);
 }
 
+function validateBio(bio) {
+    const schema = Joi.object({
+        bio: Joi.string().min(1).max(1000).required(),
+    });
+    return schema.validate(bio);
+}
+
 
 exports.User = User;
 exports.Friend = Friend;
 exports.PendingFriend = PendingFriend;
 exports.Post = Post;
+exports.Bio = Bio;
 exports.validateUser = validateUser;
 exports.validateFriend = validateFriend;
 exports.validatePost = validatePost;
+exports.validateBio = validateBio;
 
